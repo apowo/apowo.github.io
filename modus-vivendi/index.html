@@ -66,14 +66,15 @@
 		.episode .links .link {
 			display: inline-block;
 			box-shadow: 0px 0px 8px #888888;
-			width: 96px;
+			width: 144px;
 			height: 48px;
 			line-height: 48px;
 			margin-left: auto;
 			margin-right: auto;
 			text-align: center;
 			vertical-align: middle;
-			font-size: 12px;
+			font-size: 10px;
+			overflow: hidden;
 		}
 	</style>
 	<script type="text/javascript">
@@ -227,28 +228,34 @@
 					link.setAttribute("class", "link");
 					link.setAttribute("href", m.url);
 					link.setAttribute("target", "_blank");
-					switch(m.type) {
-						case "audio":
-							link.innerText = `🔊 ${generateUrlShortName(m.url)}`;
-							break;
-						case "video":
-							link.innerText = `🎬 ${generateUrlShortName(m.url)}`;
-							break;
-					}
+					link.innerText = generateMediaShortName(m);
 					links.appendChild(link);
 				});
 			}
 		}
 
-		function generateUrlShortName(url) {
+		function generateMediaShortName(media) {
 			var parser = document.createElement('a');
-			parser.href = url;
+			parser.href = media.url;
 
+			var prefix = "";
+			switch(media.type) {
+				case "audio":
+					prefix = "🔊 ";
+					break;
+				case "video":
+					prefix = "🎬 ";
+					break;
+			}
+
+			if(media.url === "") {
+				return prefix + "None";
+			}
 			if(parser.hostname.endsWith("youtube.com")) {
-				return "YouTube";
+				return prefix + "YouTube";
 			}
 			else {
-				return parser.origin;
+				return prefix + parser.origin;
 			}
 		}
 
