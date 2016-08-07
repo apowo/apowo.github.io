@@ -93,6 +93,7 @@
 					}
 				}
 				catch(e) {
+					console.error(e);
 					alert(e);
 				}
 			};
@@ -114,7 +115,7 @@
 		function addEpisode(num, episode) {
 			assert(episode.tagName === "episode", "invalid data loaded");
 			var timestamp = episode.attributes["timestamp"].value;
-			var page_url, thumbnail_url, title, description;
+			var page_url, thumbnail_url, title, description, media;
 			for(var i = 0; i < episode.children.length; i++) {
 				var data = episode.children[i];
 				switch(data.tagName) {
@@ -130,12 +131,15 @@
 					case "description":
 						description = data.textContent;
 						break;
+					case "media":
+						media = loadMedia(data);
+						break;
 					default:
 						assert(false, "invalid data loaded - unknown episode tag");
 						break;
 				}
 			}
-			addEpisodeElement(num, timestamp, page_url, thumbnail_url, title, description);
+			addEpisodeElement(num, timestamp, page_url, thumbnail_url, title, description, media);
 
 			var episodeId = window.location.hash;
 			if(episodeId) {
@@ -147,7 +151,32 @@
 			}
 		}
 
-		function addEpisodeElement(num, timestamp_str, page_url, thumbnail_url, title_str, description_str) {
+		function loadMedia(mediaElement) {
+			var result = [];
+			for(var i = 0; i < mediaElement.children.length; i++) {
+				var data = mediaElement.children[i];
+				switch(data.tagName) {
+					case "audio":
+						result.push({
+							type: "audio",
+							url: data.attributes["url"].value
+						});
+						break;
+					case "video":
+						result.push({
+							type: "video",
+							url: data.attributes["url"].value
+						});
+						break;
+					default:
+						assert(false, "invalid data loaded - unknown media");
+						break;
+				}
+			}
+			return result;
+		}
+
+		function addEpisodeElement(num, timestamp_str, page_url, thumbnail_url, title_str, description_str, media) {
 			var body = document.getElementsByTagName("body")[0];
 
 			var episode = document.createElement("div");
@@ -191,6 +220,36 @@
 			link1.setAttribute("target", "_blank");
 			link1.innerText = "Web Page";
 			links.appendChild(link1);
+
+			if(media) {
+				Array.from(media).forEach(function(m) {
+					var link = document.createElement("a");
+					link.setAttribute("class", "link");
+					link.setAttribute("href", m.url);
+					link.setAttribute("target", "_blank");
+					switch(m.type) {
+						case "audio":
+							link.innerText = `🔊 ${generateUrlShortName(m.url)}`;
+							break;
+						case "video":
+							link.innerText = `🎬 ${generateUrlShortName(m.url)}`;
+							break;
+					}
+					links.appendChild(link);
+				});
+			}
+		}
+
+		function generateUrlShortName(url) {
+			var parser = document.createElement('a');
+			parser.href = url;
+
+			if(parser.hostname.endsWith("youtube.com")) {
+				return "YouTube";
+			}
+			else {
+				return parser.origin;
+			}
 		}
 
 		function assert(bool, message) {
