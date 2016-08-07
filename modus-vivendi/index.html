@@ -9,28 +9,35 @@
 		}
 
 		.episode {
-			margin: 1em;
+			padding: 1em;
+		}
+
+		.episode:target {
+			background: rgba(0, 127, 255, 0.133);
+		}
+
+		.episode a {
+			display: block;
+
+			min-height: 150px;
+
+			text-decoration: none;
+			color: black;
+
 			padding: 1em;
 			border: 1px dashed black;
+		}
+
+		.episode .thumbnail {
+			float: left;
+			padding: 0 20px 20px 0;
 		}
 
 		.episode .timestamp{
 			float: right;
 		}
 
-		.episode a {
-			text-decoration: none;
-			color: black;
-			display: block;
-			min-height: 150px;
-		}
-
-		.episode img {
-			float: left;
-			padding: 0 20px 20px 0;
-		}
-
-		.episode h1 {
+		.episode .title {
 			font-size: 15pt;
 			margin: 0;
 			padding: 0;
@@ -101,6 +108,15 @@
 				}
 			}
 			addEpisodeElement(num, timestamp, page_url, thumbnail_url, title, description);
+
+			var episodeId = window.location.hash;
+			if(episodeId) {
+				episodeId = episodeId.replace(/^#/, "");
+				var episode = document.getElementById(episodeId);
+				if(episode) {
+					window.location.href = window.location.href;
+				}
+			}
 		}
 
 		function addEpisodeElement(num, timestamp_str, page_url, thumbnail_url, title_str, description_str) {
@@ -116,7 +132,8 @@
 			episode.appendChild(a);
 
 			var thumbnail = document.createElement("img");
-			thumbnail.setAttribute("src", thumbnail_url); // + "&w=240&h=120"
+			thumbnail.setAttribute("class", "thumbnail");
+			thumbnail.setAttribute("src", thumbnail_url);
 			a.appendChild(thumbnail);
 
 			var timestamp = document.createElement("div");
@@ -126,6 +143,7 @@
 			a.appendChild(timestamp);
 
 			var title = document.createElement("h1");
+			title.setAttribute("class", "title");
 			title.innerText = `${num}. ${title_str}`;
 			a.appendChild(title);
 
