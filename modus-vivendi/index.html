@@ -3,6 +3,7 @@
 <head>
 	<title>Մոդուս Վիվենդի</title>
 	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<style type="text/css">
 		body {
 			font-family: "DejaVu Sans";
@@ -39,8 +40,10 @@
 			height: auto;
 		}
 
-		.episode .timestamp{
+		.episode .timestamp {
+			font-size: 8pt;
 			float: right;
+			margin: 0.5em;
 		}
 
 		.episode .title {
@@ -75,9 +78,48 @@
 			margin-right: auto;
 			text-align: center;
 			vertical-align: middle;
-			font-size: 10px;
+			font-size: 10pt;
 			overflow: hidden;
 		}
+
+		@media only screen and (max-width: 414px) {
+			.episode .thumbnail {
+				float: none;
+				width: 250px;
+				display: block;
+				margin: auto;
+				padding: 0;
+			}
+
+			.episode .timestamp {
+				float: none;
+				display: block;
+				width: 125px;
+				margin: auto;
+				text-align: center;
+			}
+
+			.episode .title {
+				clear: both;
+				font-size: 12pt;
+				margin-top: 1em;
+			}
+
+			.episode .description {
+				font-size: 10pt;
+			}
+		}
+
+		@media only screen and (min-width: 415px) and (max-width: 736px) {
+			.episode .title {
+				font-size: 8pt;
+			}
+
+			.episode .description {
+				font-size: 6pt;
+			}
+		}
+
 	</style>
 	<script type="text/javascript">
 		function main() {
