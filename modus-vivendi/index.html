@@ -72,11 +72,11 @@
 			assert(episodes.tagName === "episodes", "invalid data loaded");
 			for(var i = 0; i < episodes.children.length; i++) {
 				var episode = episodes.children[i];
-				addEpisode(episode);
+				addEpisode(i+1, episode);
 			}
 		}
 
-		function addEpisode(episode) {
+		function addEpisode(num, episode) {
 			assert(episode.tagName === "episode", "invalid data loaded");
 			var timestamp = episode.attributes["timestamp"].value;
 			var page_url, thumbnail_url, title, description;
@@ -100,14 +100,15 @@
 						break;
 				}
 			}
-			addEpisodeElement(timestamp, page_url, thumbnail_url, title, description);
+			addEpisodeElement(num, timestamp, page_url, thumbnail_url, title, description);
 		}
 
-		function addEpisodeElement(timestamp_str, page_url, thumbnail_url, title_str, description_str) {
+		function addEpisodeElement(num, timestamp_str, page_url, thumbnail_url, title_str, description_str) {
 			var body = document.getElementsByTagName("body")[0];
 
 			var episode = document.createElement("div");
 			episode.setAttribute("class", "episode");
+			episode.setAttribute("id", `e${num}`);
 			body.appendChild(episode);
 
 			var a = document.createElement("a");
@@ -125,7 +126,7 @@
 			a.appendChild(timestamp);
 
 			var title = document.createElement("h1");
-			title.innerText = title_str;
+			title.innerText = `${num}. ${title_str}`;
 			a.appendChild(title);
 
 			var description = document.createElement("div");
