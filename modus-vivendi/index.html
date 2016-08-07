@@ -10,27 +10,30 @@
 
 		.episode {
 			padding: 1em;
+			overflow: hidden;
 		}
 
 		.episode:target {
 			background: rgba(0, 127, 255, 0.133);
 		}
 
-		.episode a {
+		.episode .content_wrapper {
 			display: block;
-
 			min-height: 150px;
-
-			text-decoration: none;
-			color: black;
-
 			padding: 1em;
 			border: 1px dashed black;
+		}
+
+		a {
+			text-decoration: none;
+			color: black;
 		}
 
 		.episode .thumbnail {
 			float: left;
 			padding: 0 20px 20px 0;
+			width: 250px;
+			height: auto;
 		}
 
 		.episode .timestamp{
@@ -46,6 +49,30 @@
 
 		.episode .description {
 			font-size: 10pt;
+		}
+
+		.episode .links {
+			display: flex;
+			padding: 0.5em;
+			min-height: 50px;
+			background: rgba(0, 0, 0, 0.02);
+			clear: both;
+			margin-top: 0.5em;
+			justify-content: center;
+			align-items: center;
+		}
+
+		.episode .links .link {
+			display: inline-block;
+			box-shadow: 0px 0px 8px #888888;
+			width: 96px;
+			height: 48px;
+			line-height: 48px;
+			margin-left: auto;
+			margin-right: auto;
+			text-align: center;
+			vertical-align: middle;
+			font-size: 12px;
 		}
 	</style>
 	<script type="text/javascript">
@@ -127,30 +154,41 @@
 			episode.setAttribute("id", `e${num}`);
 			body.appendChild(episode);
 
-			var a = document.createElement("a");
-			a.setAttribute("href", page_url);
-			episode.appendChild(a);
+			var content_wrapper = document.createElement("a");
+			content_wrapper.setAttribute("class", "content_wrapper");
+			content_wrapper.setAttribute("href", `#e${num}`);
+			episode.appendChild(content_wrapper);
 
 			var thumbnail = document.createElement("img");
 			thumbnail.setAttribute("class", "thumbnail");
 			thumbnail.setAttribute("src", thumbnail_url);
-			a.appendChild(thumbnail);
+			content_wrapper.appendChild(thumbnail);
 
 			var timestamp = document.createElement("div");
 			timestamp.setAttribute("class", "timestamp");
 			timestamp_str = timestamp_str.replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})/, "$1-$2-$3 $4:$5")
 			timestamp.innerText = timestamp_str;
-			a.appendChild(timestamp);
+			content_wrapper.appendChild(timestamp);
 
 			var title = document.createElement("h1");
 			title.setAttribute("class", "title");
 			title.innerText = `${num}. ${title_str}`;
-			a.appendChild(title);
+			content_wrapper.appendChild(title);
 
 			var description = document.createElement("div");
 			description.setAttribute("class", "description");
 			description.innerText = description_str;
-			a.appendChild(description);
+			content_wrapper.appendChild(description);
+
+			var links = document.createElement("div");
+			links.setAttribute("class", "links");
+			content_wrapper.appendChild(links);
+
+			var link1 = document.createElement("a");
+			link1.setAttribute("class", "link");
+			link1.setAttribute("href", page_url);
+			link1.innerText = "Web Page";
+			links.appendChild(link1);
 		}
 
 		function assert(bool, message) {
