@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Մոդուս Վիվենդի</title>
+	<meta charset="utf-8">
+	<style type="text/css">
+		body {
+			font-family: "DejaVu Sans";
+		}
+
+		.episode {
+			margin: 1em;
+			padding: 1em;
+			border: 1px dashed black;
+		}
+
+		.episode .timestamp{
+			float: right;
+		}
+
+		.episode a {
+			text-decoration: none;
+			color: black;
+			display: block;
+			min-height: 150px;
+		}
+
+		.episode img {
+			float: left;
+			padding: 0 20px 20px 0;
+		}
+
+		.episode h1 {
+			font-size: 15pt;
+			margin: 0;
+			padding: 0;
+			margin-bottom: 1em;
+		}
+
+		.episode .description {
+			font-size: 10pt;
+		}
+	</style>
+	<script type="text/javascript">
+		function main() {
+			var body = document.getElementsByTagName("body")[0];
+			var loading = document.createElement("div");
+			loading.innerText = "Loading...";
+			body.appendChild(loading);
+
+			var request = new XMLHttpRequest();
+			request.onreadystatechange = function() {
+				try {
+					var DONE = this.DONE || 4;
+					if (this.readyState === DONE) {
+						body.removeChild(loading);
+						loadEpisodes(this.responseXML);
+					}
+				}
+				catch(e) {
+					alert(e);
+				}
+			};
+			request.open('GET', 'data.xml', true);
+			request.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+			request.send(null);
+		}
+
+		function loadEpisodes(data) {
+			window.data = data;
+			var episodes = data.children[0];
+			assert(episodes.tagName === "episodes", "invalid data loaded");
+			for(var i = 0; i < episodes.children.length; i++) {
+				var episode = episodes.children[i];
+				addEpisode(episode);
+			}
+		}
+
+		function addEpisode(episode) {
+			assert(episode.tagName === "episode", "invalid data loaded");
+			var timestamp = episode.attributes["timestamp"].value;
+			var page_url, thumbnail_url, title, description;
+			for(var i = 0; i < episode.children.length; i++) {
+				var data = episode.children[i];
+				switch(data.tagName) {
+					case "page":
+						page_url = data.attributes["url"].value;
+						break;
+					case "thumbnail":
+						thumbnail_url = data.attributes["url"].value;
+						break;
+					case "title":
+						title = data.textContent;
+						break;
+					case "description":
+						description = data.textContent;
+						break;
+					default:
+						assert(false, "invalid data loaded - unknown episode tag");
+						break;
+				}
+			}
+			addEpisodeElement(timestamp, page_url, thumbnail_url, title, description);
+		}
+
+		function addEpisodeElement(timestamp_str, page_url, thumbnail_url, title_str, description_str) {
+			var body = document.getElementsByTagName("body")[0];
+
+			var episode = document.createElement("div");
+			episode.setAttribute("class", "episode");
+			body.appendChild(episode);
+
+			var a = document.createElement("a");
+			a.setAttribute("href", page_url);
+			episode.appendChild(a);
+
+			var thumbnail = document.createElement("img");
+			thumbnail.setAttribute("src", thumbnail_url); // + "&w=240&h=120"
+			a.appendChild(thumbnail);
+
+			var timestamp = document.createElement("div");
+			timestamp.setAttribute("class", "timestamp");
+			timestamp_str = timestamp_str.replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})/, "$1-$2-$3 $4:$5")
+			timestamp.innerText = timestamp_str;
+			a.appendChild(timestamp);
+
+			var title = document.createElement("h1");
+			title.innerText = title_str;
+			a.appendChild(title);
+
+			var description = document.createElement("div");
+			description.setAttribute("class", "description");
+			description.innerText = description_str;
+			a.appendChild(description);
+		}
+
+		function assert(bool, message) {
+			var message = message || "assertion failed";
+			if(!bool) {
+				throw new Error(message);
+			}
+		}
+
+		window.addEventListener("load", main);
+	</script>
+</head>
+<body>
+</body>
+</html>
