@@ -40,7 +40,7 @@
 			height: auto;
 		}
 
-		.episode .timestamp {
+		.episode .timestamp, .episode_num {
 			font-size: 8pt;
 			float: right;
 			margin: 0.5em;
@@ -91,7 +91,7 @@
 				padding: 0;
 			}
 
-			.episode .timestamp {
+			.episode .timestamp, .episode_num {
 				float: none;
 				display: block;
 				width: 125px;
@@ -151,9 +151,10 @@
 			window.data = data;
 			var episodes = data.children[0];
 			assert(episodes.tagName === "episodes", "invalid data loaded");
-			for(var i = 0; i < episodes.children.length; i++) {
+			var total_num = episodes.children.length;
+			for(var i = 0; i < total_num; i++) {
 				var episode = episodes.children[i];
-				addEpisode(i+1, episode);
+				addEpisode(i+1, total_num, episode);
 			}
 
 			var episodeId = window.location.hash;
@@ -166,7 +167,7 @@
 			}
 		}
 
-		function addEpisode(num, episode) {
+		function addEpisode(num, total_num, episode) {
 			assert(episode.tagName === "episode", "invalid data loaded");
 			var timestamp = episode.attributes["timestamp"].value;
 			var page_url, thumbnail_url, title, description, media;
@@ -193,7 +194,7 @@
 						break;
 				}
 			}
-			addEpisodeElement(num, timestamp, page_url, thumbnail_url, title, description, media);
+			addEpisodeElement(num, total_num, timestamp, page_url, thumbnail_url, title, description, media);
 		}
 
 		function loadMedia(mediaElement) {
@@ -221,7 +222,7 @@
 			return result;
 		}
 
-		function addEpisodeElement(num, timestamp_str, page_url, thumbnail_url, title_str, description_str, media) {
+		function addEpisodeElement(num, total_num, timestamp_str, page_url, thumbnail_url, title_str, description_str, media) {
 			var body = document.getElementsByTagName("body")[0];
 
 			var episode = document.createElement("div");
@@ -245,9 +246,14 @@
 			timestamp.innerText = timestamp_str;
 			content_wrapper.appendChild(timestamp);
 
+			var episode_num = document.createElement("div");
+			episode_num.setAttribute("class", "episode_num");
+			episode_num.innerText = `${num} / ${total_num}`;
+			content_wrapper.appendChild(episode_num);
+
 			var title = document.createElement("h1");
 			title.setAttribute("class", "title");
-			title.innerText = `${num}. ${title_str}`;
+			title.innerText = `${title_str}`;
 			content_wrapper.appendChild(title);
 
 			var description = document.createElement("div");
