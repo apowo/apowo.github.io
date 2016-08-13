@@ -135,6 +135,15 @@
 					if (this.readyState === DONE) {
 						body.removeChild(loading);
 						loadEpisodes(this.responseXML);
+
+						var episodeId = window.location.hash;
+						if(episodeId) {
+							episodeId = episodeId.replace(/^#/, "");
+							var episode = document.getElementById(episodeId);
+							if(episode) {
+								window.location.href = window.location.href;
+							}
+						}
 					}
 				}
 				catch(e) {
@@ -155,15 +164,6 @@
 			for(var i = 0; i < total_num; i++) {
 				var episode = episodes.children[i];
 				addEpisode(i+1, total_num, episode);
-			}
-
-			var episodeId = window.location.hash;
-			if(episodeId) {
-				episodeId = episodeId.replace(/^#/, "");
-				var episode = document.getElementById(episodeId);
-				if(episode) {
-					window.location.href = window.location.href;
-				}
 			}
 		}
 
