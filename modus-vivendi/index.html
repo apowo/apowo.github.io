@@ -135,15 +135,8 @@
 					if (this.readyState === DONE) {
 						body.removeChild(loading);
 						loadEpisodes(this.responseXML);
-
-						var episodeId = window.location.hash;
-						if(episodeId) {
-							episodeId = episodeId.replace(/^#/, "");
-							var episode = document.getElementById(episodeId);
-							if(episode) {
-								window.location.href = window.location.href;
-							}
-						}
+						scrollToPosition();
+						setTimeout(scrollToPosition, 100); //TODO This is a hack!
 					}
 				}
 				catch(e) {
@@ -154,6 +147,18 @@
 			request.open('GET', 'data.xml', true);
 			request.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 			request.send(null);
+		}
+
+		function scrollToPosition() {
+			var elemId = window.location.hash;
+			if(elemId) {
+				elemId = elemId.replace(/^#/, "");
+				var elem = document.getElementById(elemId);
+				if(elem) {
+					window.location.href = window.location.href;
+					// elem.scrollIntoView();
+				}
+			}
 		}
 
 		function loadEpisodes(data) {
