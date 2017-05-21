@@ -40,8 +40,8 @@
 			height: auto;
 		}
 
-		.episode .timestamp, .episode_num {
-			font-size: 8pt;
+		.episode .timestamp, .episode_num, .episode_id {
+			font-size: 6pt;
 			float: right;
 			margin: 0.5em;
 		}
@@ -91,7 +91,7 @@
 				padding: 0;
 			}
 
-			.episode .timestamp, .episode_num {
+			.episode .timestamp, .episode_num, .episode_id {
 				float: none;
 				display: block;
 				width: 125px;
@@ -119,7 +119,6 @@
 				font-size: 6pt;
 			}
 		}
-
 	</style>
 	<script type="text/javascript">
 		function main() {
@@ -134,7 +133,8 @@
 					var DONE = this.DONE || 4;
 					if (this.readyState === DONE) {
 						body.removeChild(loading);
-						loadEpisodes(this.responseXML);
+						var data = JSON.parse(this.responseText);
+						loadEpisodes(data);
 						scrollToPosition();
 						setTimeout(scrollToPosition, 100); //TODO This is a hack!
 					}
@@ -144,8 +144,8 @@
 					alert(e);
 				}
 			};
-			request.open('GET', 'data.xml', true);
-			request.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+			request.open("GET", "data.json", true);
+			request.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 			request.send(null);
 		}
 
@@ -163,82 +163,37 @@
 
 		function loadEpisodes(data) {
 			window.data = data;
-			var episodes = data.children[0];
-			assert(episodes.tagName === "episodes", "invalid data loaded");
-			var total_num = episodes.children.length;
+			var episodes = data.episodes;
+			assert(episodes, "invalid data loaded");
+			var episode_ids = Object.getOwnPropertyNames(episodes);
+			var total_num = episode_ids.length;
 			for(var i = 0; i < total_num; i++) {
-				var episode = episodes.children[i];
-				addEpisode(i+1, total_num, episode);
+				var episode = episodes[episode_ids[i]];
+				addEpisode(i + 1, total_num, episode);
 			}
 		}
 
 		function addEpisode(num, total_num, episode) {
-			assert(episode.tagName === "episode", "invalid data loaded");
-			var timestamp = episode.attributes["timestamp"].value;
-			var page_url, thumbnail_url, title, description, media;
-			for(var i = 0; i < episode.children.length; i++) {
-				var data = episode.children[i];
-				switch(data.tagName) {
-					case "page":
-						page_url = data.attributes["url"].value;
-						break;
-					case "thumbnail":
-						thumbnail_url = data.attributes["url"].value;
-						break;
-					case "title":
-						title = data.textContent;
-						break;
-					case "description":
-						description = data.textContent;
-						break;
-					case "media":
-						media = loadMedia(data);
-						break;
-					default:
-						assert(false, "invalid data loaded - unknown episode tag");
-						break;
-				}
-			}
-			addEpisodeElement(num, total_num, timestamp, page_url, thumbnail_url, title, description, media);
-		}
+			assert(episode, "invalid data loaded");
 
-		function loadMedia(mediaElement) {
-			var result = [];
-			for(var i = 0; i < mediaElement.children.length; i++) {
-				var data = mediaElement.children[i];
-				switch(data.tagName) {
-					case "audio":
-						result.push({
-							type: "audio",
-							url: data.attributes["url"].value
-						});
-						break;
-					case "video":
-						result.push({
-							type: "video",
-							url: data.attributes["url"].value
-						});
-						break;
-					default:
-						assert(false, "invalid data loaded - unknown media");
-						break;
-				}
-			}
-			return result;
-		}
+			var timestamp_str = episode.time;
+			var page_url = episode.url;
+			var thumbnail_url = episode.image;
+			var title_str = episode.title;
+			var description_str = episode.description;
+			var media = []; // {type: "audio|video", url: ""}
 
-		function addEpisodeElement(num, total_num, timestamp_str, page_url, thumbnail_url, title_str, description_str, media) {
 			var body = document.getElementsByTagName("body")[0];
 
-			var episode = document.createElement("div");
-			episode.setAttribute("class", "episode");
-			episode.setAttribute("id", `e${num}`);
-			body.appendChild(episode);
+			var episode_elem = document.createElement("div");
+			episode_elem.setAttribute("class", "episode");
+			episode_elem.setAttribute("id", `e${num}`);
+			body.appendChild(episode_elem);
 
 			var content_wrapper = document.createElement("a");
 			content_wrapper.setAttribute("class", "content_wrapper");
 			content_wrapper.setAttribute("href", `#e${num}`);
-			episode.appendChild(content_wrapper);
+			episode_elem.appendChild(content_wrapper);
 
 			var thumbnail = document.createElement("img");
 			thumbnail.setAttribute("class", "thumbnail");
@@ -247,9 +202,14 @@
 
 			var timestamp = document.createElement("div");
 			timestamp.setAttribute("class", "timestamp");
-			timestamp_str = timestamp_str.replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})/, "$1-$2-$3 $4:$5")
+			timestamp_str = timestamp_str.replace(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/, "$1-$2-$3 $4:$5")
 			timestamp.innerText = timestamp_str;
 			content_wrapper.appendChild(timestamp);
+
+			var episode_id = document.createElement("div");
+			episode_id.setAttribute("class", "episode_id");
+			episode_id.innerText = `${episode.id}`;
+			content_wrapper.appendChild(episode_id);
 
 			var episode_num = document.createElement("div");
 			episode_num.setAttribute("class", "episode_num");
@@ -290,7 +250,7 @@
 		}
 
 		function generateMediaShortName(media) {
-			var parser = document.createElement('a');
+			var parser = document.createElement("a");
 			parser.href = media.url;
 
 			var prefix = "";
